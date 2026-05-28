@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>松颐 | 智慧康养 · 守护长者晚年</title>
+<style>
+/* ============ RESET & TOKENS ============ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#F2F4F2;
+  --card:#FFFFFF;
+  --text:#1A1A1A;
+  --muted:#8E8E93;
+  --amber:#C88B52;
+  --amber-glow:#E6B880;
+  --sage:#7D8E7E;
+  --sage-light:#A3B0A4;
+  --danger:#E74C3C;
+  --danger-bg:#FFF5F5;
+  --bezel:#0A0A0A;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius:24px;
+}
+
+html,body{
+  width:100%;height:100%;
+  font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei',-apple-system,sans-serif;
+  background:#E8ECE8;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ============ PHONE BEZEL ============ */
+.phone-bezel{
+  width:390px;height:844px;
+  background:var(--card);
+  border-radius:44px;
+  overflow:hidden;
+  position:relative;
+  box-shadow:
+    0 0 0 4px var(--bezel),
+    0 0 0 8px #1a1a1a,
+    0 0 0 10px rgba(0,0,0,0.3),
+    0 30px 80px rgba(0,0,0,0.3),
+    0 12px 32px rgba(0,0,0,0.15);
+}
+
+/* Dynamic Island */
+.dynamic-island{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:126px;height:34px;background:var(--bezel);border-radius:20px;
+  z-index:100;
+}
+
+/* Home indicator */
+.home-indicator{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  width:134px;height:5px;background:var(--text);border-radius:100px;
+  opacity:0.3;z-index:100;
+}
+
+/* ============ APP SCREEN ============ */
+.app-screen{
+  width:100%;height:100%;
+  overflow:hidden;
+  position:relative;
+  background:var(--bg);
+}
+
+/* ============ PAGE SYSTEM ============ */
+.page{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  display:flex;flex-direction:column;
+  background:var(--bg);
+  transition: transform 0.5s var(--ease), opacity 0.5s var(--ease);
+  will-change:transform,opacity;
+  overflow:hidden;
+}
+
+.page.active{ transform:translateX(0); opacity:1; z-index:2; }
+.page.exit-left{ transform:translateX(-30%); opacity:0; z-index:1; }
+.page.enter-right{ transform:translateX(100%); opacity:0; z-index:0; }
+
+/* ============ PAGE HEADER ============ */
+.page-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:58px 20px 14px;flex-shrink:0;
+  background:var(--bg);
+}
+
+.header-btn{
+  width:36px;height:36px;border:none;background:rgba(0,0,0,0.04);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;color:var(--text);
+  transition:background 0.3s;
+}
+.header-btn:hover{background:rgba(0,0,0,0.08);}
+.header-btn.empty{visibility:hidden;}
+
+.header-title{
+  font-size:17px;font-weight:700;letter-spacing:1px;color:var(--text);
+}
+
+.page-body{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:0 20px 100px;
+}
+
+.page-body::-webkit-scrollbar{width:3px}
+.page-body::-webkit-scrollbar-track{background:transparent}
+.page-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.1);border-radius:10px}
+
+/* ============ PAGE 1: LOGIN GATEWAY ============ */
+.login-content{
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 20px;height:100%;justify-content:center;gap:48px;
+}
+
+.login-brand{text-align:center;}
+.login-brand .brand-title{
+  font-size:42px;font-weight:200;letter-spacing:12px;color:var(--text);
+  margin-bottom:8px;
+}
+.login-brand .brand-sub{
+  font-size:13px;color:var(--muted);letter-spacing:4px;font-weight:300;
+}
+
+.login-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:320px;}
+
+.role-card{
+  display:flex;align-items:center;gap:16px;
+  padding:20px 22px;background:var(--card);border-radius:var(--radius);
+  cursor:pointer;transition:all 0.4s var(--ease);
+  border:1px solid rgba(0,0,0,0.04);
+}
+.role-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,0.06);}
+.role-card:active{transform:scale(0.98);}
+
+.role-icon{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:22px;
+}
+.role-icon.sage{background:rgba(125,142,126,0.12);color:var(--sage);}
+.role-icon.amber{background:rgba(200,139,82,0.12);color:var(--amber);}
+
+.role-info h3{font-size:17px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.role-info p{font-size:12px;color:var(--muted);line-height:1.4;}
+
+.login-footer{
+  font-size:11px;color:var(--muted);letter-spacing:2px;text-align:center;
+  position:absolute;bottom:100px;
+}
+
+/* ============ PAGE 2: ELDERLY CONTROL ============ */
+/* Chair Image Gallery */
+.chair-gallery{
+  position:relative;margin-bottom:16px;border-radius:var(--radius);
+  overflow:hidden;height:160px;background:var(--card);
+  box-shadow:0 2px 12px rgba(0,0,0,0.03);
+}
+.chair-gallery img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:opacity 0.5s var(--ease),transform 0.5s var(--ease);
+}
+.chair-gallery-nav{
+  position:absolute;bottom:10px;left:0;right:0;
+  display:flex;justify-content:center;gap:6px;
+}
+.chair-gallery-nav .g-dot{
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.5);
+  cursor:pointer;transition:all 0.3s;
+}
+.chair-gallery-nav .g-dot.active{background:#fff;width:20px;border-radius:3px;}
+
+/* Scene Mode Cards */
+.scene-cards{display:flex;gap:10px;margin-bottom:16px;}
+.scene-card{
+  flex:1;background:var(--card);border-radius:var(--radius);
+  padding:18px 14px;cursor:pointer;border:2px solid transparent;
+  transition:all 0.45s var(--ease);display:flex;flex-direction:column;
+  align-items:center;gap:8px;min-height:130px;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+.scene-card:hover{border-color:rgba(125,142,126,0.3);}
+.scene-card.active{border-color:var(--amber);box-shadow:0 4px 20px rgba(200,139,82,0.12);transform:scale(1.03);}
+.scene-card .sc-icon{font-size:24px;opacity:0.5;transition:opacity 0.4s;}
+.scene-card.active .sc-icon{opacity:1;}
+.scene-card .sc-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:1px;}
+.scene-card .sc-angle{font-size:13px;color:var(--sage);font-weight:600;}
+.scene-card.active .sc-angle{color:var(--amber);}
+.scene-card .sc-desc{font-size:10px;color:var(--muted);text-align:center;}
+
+/* Telemetry Panel */
+.telemetry-panel{
+  background:var(--card);border-radius:var(--radius);
+  padding:20px 20px 16px;display:flex;flex-direction:column;align-items:center;
+  margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.03);
+}
+.telemetry-title{
+  font-size:15px;font-weight:600;color:var(--sage);letter-spacing:3px;
+  transition:color 0.5s var(--ease);
+}
+.telemetry-title.amber{color:var(--amber);}
+.t-angle-wrap{
+  display:flex;align-items:baseline;justify-content:center;margin:4px 0;
+  height:100px;position:relative;
+}
+.t-digit-col{
+  width:56px;height:100px;overflow:hidden;position:relative;
+}
+.t-digit-strip{
+  position:absolute;left:0;width:100%;
+  transition:transform 0.8s var(--ease);
+}
+.t-digit-item{
+  height:100px;display:flex;align-items:center;justify-content:center;
+  font-size:88px;font-weight:200;line-height:1;color:var(--text);
+}
+.t-degree{
+  font-size:56px;font-weight:200;color:var(--text);
+  transition:color 0.5s var(--ease);
+}
+.t-degree.amber{color:var(--amber);}
+.t-subtitle{
+  font-size:12px;color:var(--muted);letter-spacing:2px;
+  transition:color 0.5s var(--ease);
+}
+.t-subtitle.amber{color:var(--amber);}
+
+/* Assist Button */
+.assist-section{display:flex;flex-direction:column;align-items:center;}
+.assist-wrap{position:relative;}
+.assist-btn{
+  width:72px;height:72px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--sage),var(--sage-light));
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:#fff;box-shadow:0 6px 20px rgba(125,142,126,0.3);
+  transition:transform 0.2s;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+.assist-btn:active{transform:scale(0.93);}
+.assist-ring{position:absolute;inset:-8px;pointer-events:none;}
+.assist-ring circle.bg{fill:none;stroke:rgba(0,0,0,0.06);stroke-width:3;}
+.assist-ring circle.fg{fill:none;stroke:var(--amber);stroke-width:3;stroke-linecap:round;
+  stroke-dasharray:251;stroke-dashoffset:251;}
+.assist-label{font-size:11px;color:var(--muted);letter-spacing:2px;margin-top:8px;}
+
+/* ============ PAGE 3: CAREGIVER TELEMETRY ============ */
+.telemetry-card{
+  background:var(--card);border-radius:var(--radius);padding:18px;
+  margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,0.03);
+}
+.telemetry-card .tc-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+}
+.telemetry-card .tc-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:1px;}
+.telemetry-card .tc-value{font-size:22px;font-weight:300;color:var(--sage);}
+.telemetry-card .tc-value.amber{color:var(--amber);}
+
+/* Vital Wave Card */
+.vital-wave{width:100%;height:60px;margin-bottom:4px;}
+.vital-wave svg{width:100%;height:100%;}
+.vital-path{fill:none;stroke:var(--sage);stroke-width:2;}
+.vital-path.accent{stroke:var(--danger);}
+
+/* Status Card (Green) */
+.status-card-green{
+  background:linear-gradient(135deg,var(--sage),var(--sage-light));
+  border-radius:var(--radius);padding:20px;margin-bottom:14px;color:#fff;
+  box-shadow:0 4px 16px rgba(125,142,126,0.25);
+}
+.status-card-green .scg-title{font-size:12px;opacity:0.8;letter-spacing:2px;margin-bottom:6px;}
+.status-card-green .scg-body{font-size:28px;font-weight:300;letter-spacing:2px;margin-bottom:4px;}
+.status-card-green .scg-sub{font-size:12px;opacity:0.75;}
+
+/* Warning Card */
+.warning-card{
+  background:var(--danger-bg);border-radius:var(--radius);padding:16px;
+  display:flex;align-items:flex-start;gap:14px;
+  border-left:5px solid var(--danger);margin-bottom:14px;
+}
+.warning-card .wc-icon{
+  font-size:24px;flex-shrink:0;margin-top:2px;
+}
+.warning-card .wc-info h4{font-size:14px;font-weight:700;color:var(--danger);margin-bottom:4px;}
+.warning-card .wc-info p{font-size:12px;color:var(--text);line-height:1.6;}
+.warning-card .wc-time{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* SVGWave Card */
+.vital-card{padding-bottom:8px;}
+
+/* ============ GLOBAL TOAST ============ */
+.global-toast{
+  position:absolute;bottom:40px;left:24px;right:24px;
+  background:var(--text);color:#fff;padding:14px 18px;border-radius:16px;
+  font-size:12px;font-weight:500;letter-spacing:1px;text-align:center;
+  transform:translateY(120px);opacity:0;z-index:200;
+  transition:transform 0.5s var(--ease),opacity 0.5s var(--ease);
+  box-shadow:0 8px 32px rgba(0,0,0,0.25);
+  pointer-events:none;
+}
+.global-toast.show{transform:translateY(0);opacity:1;}
+
+/* ============ SAFETY OVERLAY ============ */
+.safety-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,0.35);z-index:150;
+  display:flex;align-items:flex-start;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.4s;
+}
+.safety-overlay.show{opacity:1;}
+.safety-banner{
+  margin-top:100px;background:linear-gradient(135deg,var(--amber-glow),var(--amber));
+  color:#fff;padding:16px 24px;border-radius:20px;text-align:center;
+  box-shadow:0 8px 32px rgba(200,139,82,0.4);
+  transform:translateY(-20px);transition:transform 0.4s var(--ease);
+}
+.safety-overlay.show .safety-banner{transform:translateY(0);}
+.safety-banner h3{font-size:17px;font-weight:700;margin-bottom:4px;}
+.safety-banner p{font-size:12px;opacity:0.9;line-height:1.5;}
+
+/* ============ MEDIA QUERIES ============ */
+@media(max-width:430px){
+  .phone-bezel{width:100vw;height:100vh;border-radius:0;box-shadow:none;}
+  .dynamic-island,.home-indicator{display:none;}
+}
+
+@media(min-width:431px) and (max-height:880px){
+  .phone-bezel{transform:scale(0.85);transform-origin:center center;}
+}
+</style>
+</head>
+<body>
+
+<div class="phone-bezel">
+  <div class="dynamic-island"></div>
+  
+  <!-- ============ APP SCREEN ============ -->
+  <div class="app-screen" id="appScreen">
+
+    <!-- ==================== PAGE 1: LOGIN ==================== -->
+    <div class="page active" id="page-login">
+      <div class="login-content">
+        <div class="login-brand">
+          <div class="brand-title">松 颐</div>
+          <div class="brand-sub">智慧康养 · 守护长者晚年</div>
+        </div>
+        <div class="login-cards">
+          <div class="role-card" onclick="navigateTo('elderly')">
+            <div class="role-icon sage">👤</div>
+            <div class="role-info">
+              <h3>我是长者</h3>
+              <p>开启我的舒适社交与阅读模式</p>
+            </div>
+          </div>
+          <div class="role-card" onclick="navigateTo('caregiver')">
+            <div class="role-icon amber">❤️</div>
+            <div class="role-info">
+              <h3>我是子女/护工</h3>
+              <p>远程守护，实时获取健康雷达数据</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="login-footer">松颐 · 坐享其美</div>
+    </div>
+
+    <!-- ==================== PAGE 2: ELDERLY CONTROL ==================== -->
+    <div class="page enter-right" id="page-elderly">
+      <div class="page-header">
+        <button class="header-btn" onclick="navigateTo('login')">←</button>
+        <span class="header-title">松颐控制端</span>
+        <button class="header-btn">⚙</button>
+      </div>
+      <div class="page-body">
+        <!-- Chair Image Gallery -->
+        <div class="chair-gallery" id="chairGallery">
+          <img id="chairImg" src="https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957242890-ahhuyx-Gemini_Generated_Image___1_.png" alt="松颐座椅">
+          <div class="chair-gallery-nav" id="galleryNav">
+            <span class="g-dot active" data-idx="0"></span>
+            <span class="g-dot" data-idx="1"></span>
+            <span class="g-dot" data-idx="2"></span>
+            <span class="g-dot" data-idx="3"></span>
+          </div>
+        </div>
+
+        <!-- Scene Mode Cards -->
+        <div class="scene-cards" id="sceneCards">
+          <div class="scene-card active" data-mode="read" onclick="selectMode('read',this)">
+            <span class="sc-icon">📖</span>
+            <span class="sc-name">观云</span>
+            <span class="sc-angle">98°</span>
+            <span class="sc-desc">专注阅读<br/>腰椎支撑</span>
+          </div>
+          <div class="scene-card" data-mode="social" onclick="selectMode('social',this)">
+            <span class="sc-icon">👥</span>
+            <span class="sc-name">听泉</span>
+            <span class="sc-angle">102°</span>
+            <span class="sc-desc">舒适社交<br/>阻尼柔和</span>
+          </div>
+          <div class="scene-card" data-mode="nap" onclick="selectMode('nap',this)">
+            <span class="sc-icon">🛏️</span>
+            <span class="sc-name">松风</span>
+            <span class="sc-angle">112°</span>
+            <span class="sc-desc">午后小憩<br/>40°C 热敷</span>
+          </div>
+        </div>
+
+        <!-- Telemetry Panel -->
+        <div class="telemetry-panel">
+          <div class="telemetry-title amber" id="tTitle">观云阅读</div>
+          <div class="t-angle-wrap" id="tAngleWrap">
+            <div class="t-digit-col" id="dH"></div>
+            <div class="t-digit-col" id="dT"></div>
+            <div class="t-digit-col" id="dU"></div>
+            <div class="t-degree amber" id="tDegree">°</div>
+          </div>
+          <div class="t-subtitle amber" id="tSubtitle">靠背角度 · 气囊支撑中</div>
+        </div>
+
+        <!-- Assist Button -->
+        <div class="assist-section">
+          <div class="assist-wrap">
+            <button class="assist-btn" id="assistBtn"
+              onmousedown="startAssist(event)" onmouseup="cancelAssist()" onmouseleave="cancelAssist()"
+              ontouchstart="startAssist(event)" ontouchend="cancelAssist()" ontouchcancel="cancelAssist()">
+              ↑
+            </button>
+            <svg class="assist-ring" id="assistRing" viewBox="0 0 88 88">
+              <circle class="bg" cx="44" cy="44" r="40"/>
+              <circle class="fg" id="assistFg" cx="44" cy="44" r="40"/>
+            </svg>
+          </div>
+          <div class="assist-label">长按 2 秒 · 微动力助起</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PAGE 3: CAREGIVER TELEMETRY ==================== -->
+    <div class="page enter-right" id="page-caregiver">
+      <div class="page-header">
+        <button class="header-btn" onclick="navigateTo('login')">←</button>
+        <span class="header-title">健康雷达</span>
+        <button class="header-btn">🔔</button>
+      </div>
+      <div class="page-body">
+        <!-- Vital Sign Wave Card -->
+        <div class="telemetry-card vital-card">
+          <div class="tc-header">
+            <span class="tc-title">实时心率监测</span>
+            <span class="tc-value" id="vitalBpm">72 BPM</span>
+          </div>
+          <div class="vital-wave">
+            <svg viewBox="0 0 350 60" preserveAspectRatio="none" id="vitalSvg">
+              <path class="vital-path" id="vitalPath"/>
+            </svg>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+          </div>
+        </div>
+
+        <!-- Status Card -->
+        <div class="status-card-green">
+          <div class="scg-title">当前座椅状态</div>
+          <div class="scg-body" id="caregiverMode">观云阅读中</div>
+          <div class="scg-sub" id="caregiverDuration">已持续 45 分钟 · 姿态稳定</div>
+        </div>
+
+        <!-- Warning Card -->
+        <div class="warning-card">
+          <span class="wc-icon">⚠️</span>
+          <div class="wc-info">
+            <h4>夜间起夜未归告警</h4>
+            <p>今日 02:15 · 持续离座超过 20 分钟 · 底座安全地灯已联动开启</p>
+            <div class="wc-time">触发于 02:15</div>
+          </div>
+        </div>
+
+        <!-- Sedentary Alert Card -->
+        <div class="warning-card" style="border-left-color:var(--amber);background:rgba(200,139,82,0.04);">
+          <span class="wc-icon" style="color:var(--amber);">⏱️</span>
+          <div class="wc-info">
+            <h4 style="color:var(--amber);">久坐静止预警</h4>
+            <p>已持续超过 90 分钟无明显重心偏移 · 系统已联动座椅气囊交替充气按摩</p>
+            <div class="wc-time">触发于 15:40</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SAFETY OVERLAY ============ -->
+    <div class="safety-overlay" id="safetyOverlay">
+      <div class="safety-banner">
+        <h3>⚡ 推杆已介入</h3>
+        <p>底座正向前上方斜向托举 15°<br/>角度已设定至 117°</p>
+      </div>
+    </div>
+
+    <!-- ============ GLOBAL TOAST ============ -->
+    <div class="global-toast" id="globalToast"></div>
+
+  </div>
+  <div class="home-indicator"></div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+// =========== PAGE NAVIGATION ===========
+let currentPage = 'login';
+
+function navigateTo(target) {
+  const pages = {
+    login: document.getElementById('page-login'),
+    elderly: document.getElementById('page-elderly'),
+    caregiver: document.getElementById('page-caregiver'),
+  };
+  
+  if (currentPage === target) return;
+  
+  const from = pages[currentPage];
+  const to = pages[target];
+  
+  if (!from || !to) return;
+  
+  // Determine slide direction
+  const order = ['login','elderly','caregiver'];
+  const fromIdx = order.indexOf(currentPage);
+  const toIdx = order.indexOf(target);
+  
+  // Exit current
+  from.classList.remove('active');
+  if (toIdx > fromIdx) {
+    from.classList.add('exit-left');
+    from.classList.remove('enter-right');
+  }
+  
+  // Enter target
+  to.style.transition = 'transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.5s cubic-bezier(0.22,1,0.36,1)';
+  
+  if (toIdx > fromIdx) {
+    // Slide from right
+    to.style.transform = 'translateX(100%)';
+    to.style.opacity = '0';
+    to.classList.remove('exit-left');
+    to.classList.add('enter-right');
+  } else {
+    // Slide from left
+    to.style.transform = 'translateX(-30%)';
+    to.style.opacity = '0';
+    to.classList.add('exit-left');
+    to.classList.remove('enter-right');
+  }
+  
+  // Trigger reflow for animation
+  to.offsetHeight;
+  
+  // Animate in
+  to.style.transform = 'translateX(0)';
+  to.style.opacity = '1';
+  to.classList.add('active');
+  
+  // Clean up after transition
+  setTimeout(() => {
+    to.style.transition = '';
+    to.style.transform = '';
+    to.style.opacity = '';
+  }, 500);
+  
+  currentPage = target;
+  
+  // Show toast
+  if (target === 'elderly') {
+    showToast('已进入长者控制端 · 当前模式：观云 98°');
+    updateCaregiverStatus('观云阅读中', '已持续 0 分钟 · 姿态稳定');
+  } else if (target === 'caregiver') {
+    showToast('已进入子女监护端 · 实时体征监测中');
+  } else {
+    showToast('松颐 · 智慧康养系统');
+  }
+}
+
+// =========== GLOBAL TOAST ===========
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('globalToast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// =========== IMAGE GALLERY ===========
+const chairImages = [
+  'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957242890-ahhuyx-Gemini_Generated_Image___1_.png',
+  'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957337848-dgaf1d-Gemini_Generated_Image___2_.png',
+  'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957343651-jzfdj0-Gemini_Generated_Image___3_.png',
+  'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957350166-wxu2ey-Gemini_Generated_Image___4_.png'
+];
+
+let galleryIdx = 0;
+const chairImg = document.getElementById('chairImg');
+const galleryDots = document.querySelectorAll('#galleryNav .g-dot');
+
+function switchGallery(idx) {
+  if (idx === galleryIdx) return;
+  galleryIdx = idx;
+  chairImg.style.opacity = '0.4';
+  chairImg.style.transform = 'scale(1.03)';
+  setTimeout(() => {
+    chairImg.src = chairImages[idx];
+    chairImg.style.opacity = '1';
+    chairImg.style.transform = 'scale(1)';
+    galleryDots.forEach((d,i) => d.classList.toggle('active', i===idx));
+  }, 250);
+}
+
+galleryDots.forEach(dot => {
+  dot.addEventListener('click', () => switchGallery(parseInt(dot.dataset.idx)));
+});
+
+setInterval(() => switchGallery((galleryIdx + 1) % 4), 5000);
+
+// =========== MODE STATE MACHINE ===========
+const MODES = {
+  read:   { title:'观云阅读', angle:'98',  subtitle:'靠背角度 · 气囊支撑中',  amber:true,  caregiver:'观云阅读中' },
+  social: { title:'社交会客', angle:'102', subtitle:'靠背角度 · 标准社交角',    amber:false, caregiver:'听泉会客中' },
+  nap:    { title:'松风小憩', angle:'112', subtitle:'靠背角度 · 40°C 温和热敷', amber:true,  caregiver:'松风小憩中' },
+  assist: { title:'安全助起', angle:'117', subtitle:'靠背角度 · 推杆托举中',    amber:true,  caregiver:'助起运行中' }
+};
+
+let currentMode = 'read';
+let displayAngle = 98;
+let targetAngle = 98;
+let caregiverTimer = 0;
+
+function selectMode(mode, cardEl) {
+  if (mode === 'assist') return;
+  if (currentMode === mode) return;
+  
+  currentMode = mode;
+  const m = MODES[mode];
+  targetAngle = parseInt(m.angle);
+  
+  // Update cards
+  document.querySelectorAll('#sceneCards .scene-card').forEach(c => c.classList.remove('active'));
+  cardEl.classList.add('active');
+  
+  // Update telemetry
+  updateTelemetry(m);
+  
+  // Update caregiver status
+  caregiverTimer = 0;
+  updateCaregiverStatus(m.caregiver, '已持续 0 分钟 · 姿态稳定');
+  
+  showToast(`已切换至「${m.title}」模式 · 靠背角度 ${m.angle}°`);
+}
+
+function updateTelemetry(m) {
+  document.getElementById('tTitle').textContent = m.title;
+  document.getElementById('tSubtitle').textContent = m.subtitle;
+  document.getElementById('tDegree').classList.toggle('amber', m.amber);
+  document.getElementById('tTitle').classList.toggle('amber', m.amber);
+  document.getElementById('tSubtitle').classList.toggle('amber', m.amber);
+  animateDigits(targetAngle);
+}
+
+// =========== ROLLING DIGITS ===========
+function buildDigitColumns() {
+  ['dH','dT','dU'].forEach(id => {
+    const col = document.getElementById(id);
+    const strip = document.createElement('div');
+    strip.className = 't-digit-strip';
+    for(let i=0;i<=9;i++){
+      const item = document.createElement('div');
+      item.className = 't-digit-item';
+      item.textContent = i;
+      strip.appendChild(item);
+    }
+    for(let i=0;i<=9;i++){
+      const item = document.createElement('div');
+      item.className = 't-digit-item';
+      item.textContent = i;
+      strip.appendChild(item);
+    }
+    col.appendChild(strip);
+  });
+}
+
+function setDigits(val) {
+  const s = val.toString().padStart(3,'0');
+  ['dH','dT','dU'].forEach((id,i) => {
+    const strip = document.getElementById(id).querySelector('.t-digit-strip');
+    const h = document.getElementById(id).clientHeight;
+    strip.style.transform = `translateY(${-parseInt(s[i]) * h}px)`;
+  });
+}
+
+function animateDigits(target) {
+  const start = displayAngle;
+  const diff = target - start;
+  const dur = 800, st = performance.now();
+  function tick(now) {
+    const p = Math.min((now-st)/dur,1);
+    const eased = 1 - Math.pow(1-p,3);
+    const cur = Math.round(start + diff * eased);
+    setDigits(cur);
+    if(p<1) requestAnimationFrame(tick);
+    else { displayAngle = target; setDigits(target); }
+  }
+  requestAnimationFrame(tick);
+  displayAngle = target;
+}
+
+// =========== LONG PRESS ASSIST ===========
+let assistInterval = null, assistStart = 0;
+const ASSIST_DUR = 2000;
+
+function startAssist(e) {
+  e.preventDefault();
+  if (assistInterval) return;
+  const fg = document.getElementById('assistFg');
+  fg.style.strokeDashoffset = '251';
+  fg.style.transition = 'none';
+  assistStart = Date.now();
+  assistInterval = setInterval(() => {
+    const frac = Math.min((Date.now()-assistStart)/ASSIST_DUR, 1);
+    fg.style.strokeDashoffset = 251*(1-frac);
+    if (frac >= 1) completeAssist();
+  }, 30);
+}
+
+function cancelAssist() {
+  if (!assistInterval) return;
+  clearInterval(assistInterval); assistInterval = null;
+  const fg = document.getElementById('assistFg');
+  fg.style.transition = 'stroke-dashoffset 0.3s ease';
+  fg.style.strokeDashoffset = '251';
+}
+
+function completeAssist() {
+  clearInterval(assistInterval); assistInterval = null;
+  const fg = document.getElementById('assistFg');
+  fg.style.strokeDashoffset = '251';
+  
+  currentMode = 'assist';
+  const m = MODES.assist;
+  targetAngle = parseInt(m.angle);
+  
+  document.querySelectorAll('#sceneCards .scene-card').forEach(c => c.classList.remove('active'));
+  updateTelemetry(m);
+  caregiverTimer = 0;
+  updateCaregiverStatus(m.caregiver, '已持续 0 分钟 · 推杆介入中');
+  
+  // Show safety overlay
+  const overlay = document.getElementById('safetyOverlay');
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 3500);
+  
+  showToast('⚡ 微动力推杆介入中 · 正在斜向托举 15°');
+}
+
+// =========== VITAL SIGN WAVEFORM ===========
+let wavePhase = 0;
+function drawVitalWave() {
+  const path = document.getElementById('vitalPath');
+  const pts = 180;
+  let d = '';
+  for(let i=0;i<=pts;i++){
+    const x = (i/pts)*350;
+    const base = 30;
+    const hw = Math.sin(wavePhase + i*0.18)*6;
+    const bw = Math.sin(wavePhase*0.2 + i*0.05)*8;
+    const n = Math.sin(wavePhase*1.5 + i*0.35)*2;
+    const y = base + hw + bw + n;
+    d += (i===0?'M ':'L ') + x + ' ' + y;
+  }
+  path.setAttribute('d', d);
+  wavePhase += 0.06;
+  
+  // Update BPM
+  const bpm = 70 + Math.round(Math.sin(wavePhase*0.5)*6);
+  document.getElementById('vitalBpm').textContent = bpm + ' BPM';
+  
+  requestAnimationFrame(drawVitalWave);
+}
+
+// =========== CAREGIVER STATUS SYNC ===========
+function updateCaregiverStatus(mode, duration) {
+  document.getElementById('caregiverMode').textContent = mode;
+  document.getElementById('caregiverDuration').textContent = duration;
+}
+
+// Simulate caregiver time update
+setInterval(() => {
+  caregiverTimer++;
+  const mins = caregiverTimer;
+  const modeName = currentMode === 'read' ? '观云阅读中' :
+                   currentMode === 'social' ? '听泉会客中' :
+                   currentMode === 'nap' ? '松风小憩中' : '运行中';
+  updateCaregiverStatus(modeName, `已持续 ${mins} 分钟 · 姿态稳定`);
+}, 60000);
+
+// =========== INIT ===========
+function init() {
+  buildDigitColumns();
+  setDigits(98);
+  drawVitalWave();
+  updateCaregiverStatus('观云阅读中', '已持续 0 分钟 · 姿态稳定');
+}
+
+init();
+
+console.log('松颐 | 智慧康养 · 三页联动原型');
+console.log('  Page 1: 角色登录分流 → Page 2: 长者控制端 / Page 3: 子女健康雷达');
+console.log('  状态机: 观云98° / 听泉102° / 松风112° / 助起117°');
+</script>
+</body>
+</html>
