@@ -3,433 +3,654 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>坐享其美 · 松颐智能座椅流体交互系统原型</title>
+<title>坐享其美 · 松颐智能座椅流体交互系统</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
-/* ============ RESET & TOKENS ============ */
+/* ========== RESET & DESIGN TOKENS ========== */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#F5F7F3;
-  --card:#FFFFFF;
-  --text:#1A1A1A;
-  --muted:#8E8E93;
-  --crimson:#D14D3B;
-  --crimson-deep:#B53A2A;
-  --crimson-glow:rgba(209,77,59,0.25);
-  --sage:#7D8E7E;
-  --sage-light:#A3B0A4;
-  --sage-bg:rgba(125,142,126,0.06);
-  --bezel:#0A0A0A;
+  --bg-start:#EEF1EB;--bg-end:#F7F9F5;
+  --card:#FFFFFF;--card-hover:#FAFBFA;
+  --text:#171717;--text-soft:#5C5C5E;
+  --muted:#999DA0;
+  --sage:#7D8E7E;--sage-light:#A3B0A4;--sage-wash:rgba(125,142,126,0.08);
+  --crimson:#C0392B;--crimson-bright:#E74C3C;--crimson-wash:rgba(192,57,43,0.07);
+  --crimson-grad:linear-gradient(145deg,#C0392B 0%,#D44637 40%,#E25A48 100%);
+  --crimson-shadow:0 12px 40px rgba(192,57,43,0.25);
+  --bezel:#1C1C1E;--bezel-inner:#2C2C2E;
   --ease:cubic-bezier(0.22,1,0.36,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
 }
 html,body{
   width:100%;height:100%;
   font-family:'PingFang SC','Noto Sans SC','Microsoft YaHei',-apple-system,sans-serif;
-  background:#E0E5DE;
+  background:linear-gradient(165deg,var(--bg-start) 0%,var(--bg-end) 60%,#EDF1EA 100%);
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;-webkit-font-smoothing:antialiased;
+  position:relative;
 }
 
-/* ============ DUAL PHONE LAYOUT ============ */
+/* ========== DECORATIVE BACKGROUND ========== */
+.bg-decoration{
+  position:fixed;pointer-events:none;z-index:0;
+}
+.bg-blob-1{
+  width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(125,142,126,0.06) 0%,transparent 70%);
+  top:-120px;left:-80px;
+}
+.bg-blob-2{
+  width:360px;height:360px;border-radius:50%;
+  background:radial-gradient(circle,rgba(192,57,43,0.04) 0%,transparent 70%);
+  bottom:-80px;right:-60px;
+}
+.bg-blob-3{
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(163,176,164,0.05) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+}
+
+/* ========== DUAL PHONE LAYOUT ========== */
 .dual-phones{
-  display:flex;gap:32px;align-items:center;justify-content:center;
+  position:relative;z-index:1;
+  display:flex;gap:40px;align-items:center;justify-content:center;
 }
 
-/* ============ SINGLE PHONE BEZEL ============ */
+/* ========== PHONE BEZEL ========== */
 .phone-bezel{
   width:390px;height:844px;
-  background:var(--bezel);
-  border-radius:44px;overflow:hidden;position:relative;
-  box-shadow:0 0 0 3px #1a1a1a,0 0 0 6px rgba(0,0,0,0.15),0 25px 60px rgba(0,0,0,0.3),0 10px 24px rgba(0,0,0,0.2);
+  background:linear-gradient(180deg,#1C1C1E 0%,#2C2C2E 50%,#1C1C1E 100%);
+  border-radius:48px;overflow:hidden;position:relative;
+  box-shadow:
+    0 0 0 2px #3A3A3C,
+    0 0 0 5px #1C1C1E,
+    0 0 0 7px rgba(0,0,0,0.15),
+    0 30px 70px rgba(0,0,0,0.35),
+    0 12px 30px rgba(0,0,0,0.2);
 }
-.phone-bezel .dynamic-island{
-  position:absolute;top:11px;left:50%;transform:translateX(-50%);
-  width:120px;height:32px;background:#000;border-radius:20px;z-index:99;
+.phone-bezel::before{
+  content:'';position:absolute;inset:2px;border-radius:46px;
+  border:1px solid rgba(255,255,255,0.06);pointer-events:none;z-index:98;
+}
+.dynamic-island{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:126px;height:34px;background:#000;border-radius:20px;z-index:99;
 }
 .phone-screen{
   position:absolute;top:0;left:0;width:100%;height:100%;
-  background:var(--card);border-radius:44px;overflow:hidden;
+  background:var(--card);border-radius:48px;overflow:hidden;
   display:flex;flex-direction:column;
 }
-.phone-bezel .home-bar{
+.home-bar{
   position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
-  width:134px;height:5px;background:#fff;border-radius:100px;opacity:0.3;z-index:99;
+  width:134px;height:5px;background:#fff;border-radius:100px;opacity:0.25;z-index:99;
 }
 
-/* ============ LEFT PHONE ============ */
+/* ========== LEFT PHONE ========== */
+.left-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:54px 22px 10px;flex-shrink:0;z-index:2;
+}
+.left-topbar .avatar{
+  width:40px;height:40px;border-radius:50%;background:var(--sage-wash);
+  display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sage);
+}
+.left-topbar .greeting{
+  font-size:16px;font-weight:600;color:var(--text);letter-spacing:0.5px;
+}
+.left-topbar .icons{display:flex;gap:16px;color:var(--muted);font-size:14px;}
+
+/* scroll content */
 .left-content{
   flex:1;overflow-y:auto;overflow-x:hidden;
   -ms-overflow-style:none;scrollbar-width:none;
-  padding:50px 18px 100px;
+  padding:4px 18px 120px;
 }
 .left-content::-webkit-scrollbar{display:none}
-.left-topbar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:52px 20px 8px;flex-shrink:0;
-}
-.left-topbar .avatar{
-  width:38px;height:38px;border-radius:50%;background:var(--sage-bg);
-  display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sage);
-}
-.left-topbar .greeting{font-size:15px;font-weight:600;color:var(--text);letter-spacing:1px;}
-.left-topbar .icons{display:flex;gap:12px;color:var(--muted);font-size:13px;}
 
-.card-list{display:flex;flex-direction:column;gap:10px;}
+/* section label */
+.section-label{
+  font-size:11px;font-weight:600;color:var(--muted);letter-spacing:2px;
+  text-transform:uppercase;padding:12px 4px 8px;
+}
 
-/* Expandable card */
+/* expandable card */
 .expand-card{
   background:var(--card);
-  border-radius:24px;overflow:hidden;
-  cursor:pointer;position:relative;
+  border-radius:22px;overflow:hidden;cursor:pointer;position:relative;
+  margin-bottom:10px;
   border:1px solid rgba(0,0,0,0.04);
+  box-shadow:0 1px 3px rgba(0,0,0,0.03),0 2px 8px rgba(0,0,0,0.02);
   transition:all 0.55s var(--ease);
   -webkit-tap-highlight-color:transparent;
   user-select:none;-webkit-user-select:none;
 }
+.expand-card:last-child{margin-bottom:0;}
+.expand-card:hover{
+  box-shadow:0 2px 6px rgba(0,0,0,0.04),0 4px 16px rgba(0,0,0,0.03);
+}
+
 .card-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 20px;transition:padding 0.5s var(--ease);
+  display:flex;align-items:center;padding:16px 18px;
+  transition:padding 0.5s var(--ease);
 }
-.card-icon{
-  width:42px;height:42px;border-radius:14px;
+.card-icon-wrap{
+  width:44px;height:44px;border-radius:15px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;flex-shrink:0;transition:all 0.5s var(--ease);
+  transition:all 0.5s var(--ease);
+  position:relative;
 }
-.card-icon.sage{background:var(--sage-bg);color:var(--sage);}
-.card-info{flex:1;margin-left:14px;transition:margin 0.5s var(--ease);}
-.card-info .card-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:1px;transition:all 0.5s var(--ease);}
-.card-info .card-sub{font-size:11px;color:var(--muted);margin-top:2px;transition:all 0.5s var(--ease);}
-.card-chevron{font-size:12px;color:var(--muted);opacity:0.5;transition:all 0.5s var(--ease);}
+.card-icon-wrap.sage{
+  background:var(--sage-wash);color:var(--sage);
+}
+.card-info{
+  flex:1;margin-left:14px;display:flex;flex-direction:column;gap:2px;
+  transition:margin 0.5s var(--ease);
+}
+.card-info .card-title{
+  font-size:15px;font-weight:600;color:var(--text);letter-spacing:0.5px;
+  transition:all 0.5s var(--ease);
+}
+.card-info .card-sub{
+  font-size:11px;color:var(--text-soft);line-height:1.3;
+  transition:all 0.5s var(--ease);
+}
+.card-angle-badge{
+  font-size:20px;font-weight:300;color:var(--sage);margin-left:8px;
+  transition:all 0.5s var(--ease);
+}
 
-.card-detail{max-height:0;overflow:hidden;transition:max-height 0.55s var(--ease),padding 0.5s var(--ease);padding:0 20px;}
-.card-detail-inner{padding-bottom:18px;opacity:0;transform:translateY(-8px);transition:all 0.45s var(--ease) 0.1s;}
-.card-detail .detail-angle{font-size:52px;font-weight:100;color:var(--crimson);line-height:1;transition:all 0.5s var(--ease);}
-.card-detail .detail-desc{font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;margin-top:4px;transition:all 0.5s var(--ease);}
-.card-detail .detail-features{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.card-detail .detail-feature{font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);transition:all 0.5s var(--ease);}
+.card-detail-wrap{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.55s var(--ease);
+}
+.card-detail-inner{
+  padding:0 18px 18px;opacity:0;
+  transform:translateY(-6px);
+  transition:all 0.45s var(--ease) 0.08s;
+  display:flex;flex-direction:column;gap:8px;
+}
+.card-detail-inner .detail-large{
+  font-size:44px;font-weight:200;color:var(--crimson);line-height:1;
+  transition:color 0.5s var(--ease);
+}
+.card-detail-inner .detail-desc{
+  font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;
+}
+.card-detail-inner .detail-tags{
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+.card-detail-inner .detail-tag{
+  font-size:10px;padding:5px 12px;border-radius:20px;
+  background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.9);
+}
 
-/* ACTIVE CARD — crimson expansion */
+/* ACTIVE card */
 .expand-card.active{
-  background:linear-gradient(135deg,var(--crimson),#E85D4A);
+  background:var(--crimson-grad);
   border-color:transparent;
-  box-shadow:0 8px 28px var(--crimson-glow);
-  transform:scale(1.02);
+  box-shadow:var(--crimson-shadow);
+  transform:scale(1.015);
+  margin-bottom:12px;
 }
-.expand-card.active .card-header{padding:20px 22px;}
-.expand-card.active .card-icon{background:rgba(255,255,255,0.2);color:#fff;}
-.expand-card.active .card-title{color:#fff;font-size:18px;}
-.expand-card.active .card-sub{color:rgba(255,255,255,0.7);}
-.expand-card.active .card-chevron{color:#fff;opacity:0.8;transform:rotate(180deg);}
-.expand-card.active .card-detail{max-height:180px;}
+.expand-card.active .card-header{padding:18px 20px;}
+.expand-card.active .card-icon-wrap{background:rgba(255,255,255,0.2);color:#fff;}
+.expand-card.active .card-title{color:#fff;font-size:16px;font-weight:700;}
+.expand-card.active .card-sub{color:rgba(255,255,255,0.75);}
+.expand-card.active .card-angle-badge{color:rgba(255,255,255,0.65);}
+.expand-card.active .card-detail-wrap{max-height:200px;}
 .expand-card.active .card-detail-inner{opacity:1;transform:translateY(0);}
-.expand-card.active .detail-angle{color:#fff;}
+.expand-card.active .detail-large{color:#fff;}
 .expand-card.active .detail-desc{color:rgba(255,255,255,0.85);}
-.expand-card.active .detail-feature{background:rgba(255,255,255,0.25);color:#fff;}
+.expand-card.active .detail-tag{background:rgba(255,255,255,0.2);color:#fff;}
 
-/* Bottom capsule bar */
-.bottom-capsule-bar{
+/* bottom capsule bar */
+.bottom-bar{
   position:absolute;bottom:0;left:0;right:0;
   display:flex;justify-content:space-around;align-items:center;
-  padding:12px 16px 36px;gap:4px;
-  background:linear-gradient(to top,rgba(255,255,255,0.95) 60%,transparent);
-  z-index:10;flex-shrink:0;
+  padding:10px 20px 34px;gap:2px;
+  background:linear-gradient(to top,rgba(255,255,255,0.97) 55%,rgba(255,255,255,0) 100%);
+  z-index:10;
 }
-.capsule-item{
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:8px 14px;border-radius:20px;
-  cursor:pointer;transition:all 0.35s var(--ease);
-  font-size:9px;color:var(--muted);-webkit-tap-highlight-color:transparent;
+.capsule{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 12px;border-radius:18px;cursor:pointer;
+  transition:all 0.35s var(--ease);
+  font-size:9px;font-weight:500;color:var(--muted);
+  -webkit-tap-highlight-color:transparent;
 }
-.capsule-item i{font-size:15px;}
-.capsule-item.active{background:rgba(209,77,59,0.1);color:var(--crimson);font-weight:600;}
-.capsule-item:hover{color:var(--text);}
+.capsule i{font-size:16px;margin-bottom:1px;}
+.capsule.active{background:var(--crimson-wash);color:var(--crimson);font-weight:600;}
+.capsule.active i{color:var(--crimson);}
 
-/* ============ RIGHT PHONE — FLUID PLAYER ============ */
+/* ========== RIGHT PHONE ========== */
 .right-screen{
   position:absolute;top:0;left:0;width:100%;height:100%;
-  border-radius:44px;overflow:hidden;
+  border-radius:48px;overflow:hidden;
   display:flex;flex-direction:column;
-  transition:background 0.6s var(--ease);
+  transition:background 0.65s var(--ease);
   background:var(--card);
 }
-.right-screen.bleed-crimson{
-  background:linear-gradient(160deg,var(--crimson),#E85D4A);
+.right-screen.crimson{
+  background:linear-gradient(160deg,#C0392B 0%,#D44637 35%,#E25A48 80%,#EC6B58 100%);
 }
 
 .right-topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:52px 20px 6px;flex-shrink:0;
+  padding:54px 22px 8px;flex-shrink:0;z-index:2;
   transition:color 0.5s var(--ease);
 }
-.right-screen.bleed-crimson .right-topbar{color:#fff;}
-.right-topbar .back-btn{
-  width:34px;height:34px;border-radius:50%;border:none;
+.right-screen.crimson .right-topbar{color:#fff;}
+.right-topbar .r-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
   background:rgba(0,0,0,0.04);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   font-size:14px;color:inherit;transition:background 0.3s;
 }
-.right-screen.bleed-crimson .back-btn{background:rgba(255,255,255,0.15);}
-.right-topbar .mode-label{font-size:13px;font-weight:600;letter-spacing:2px;transition:color 0.5s var(--ease);}
+.right-screen.crimson .r-btn{background:rgba(255,255,255,0.15);}
+.right-topbar .mode-label{
+  font-size:13px;font-weight:600;letter-spacing:1.5px;transition:color 0.5s var(--ease);
+}
 
 .right-body{
   flex:1;overflow-y:auto;overflow-x:hidden;
   -ms-overflow-style:none;scrollbar-width:none;
-  padding:0 18px 30px;display:flex;flex-direction:column;align-items:center;
+  padding:0 20px 30px;display:flex;flex-direction:column;align-items:center;
 }
 .right-body::-webkit-scrollbar{display:none}
 
-/* Centerpiece */
-.centerpiece-zone{
-  width:100%;aspect-ratio:4/3;border-radius:24px;overflow:hidden;
-  margin-bottom:16px;position:relative;
-  background:var(--card);transition:all 0.6s var(--ease);
+/* centerpiece */
+.centerpiece{
+  width:100%;border-radius:22px;overflow:hidden;
+  margin-bottom:18px;position:relative;
+  background:var(--card);
+  box-shadow:0 2px 12px rgba(0,0,0,0.04);
+  transition:all 0.65s var(--ease);
+  aspect-ratio:4/3;
 }
-.right-screen.bleed-crimson .centerpiece-zone{background:rgba(255,255,255,0.1);}
-.centerpiece-zone img{
-  width:100%;height:100%;object-fit:cover;
-  transition:opacity 0.6s var(--ease),transform 0.6s var(--ease);
+.right-screen.crimson .centerpiece{
+  background:rgba(255,255,255,0.08);
+  box-shadow:0 4px 24px rgba(0,0,0,0.08);
 }
-.centerpiece-dots{
-  position:absolute;bottom:10px;left:0;right:0;
-  display:flex;justify-content:center;gap:6px;
+.centerpiece img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:opacity 0.55s var(--ease),transform 0.55s var(--ease);
 }
-.centerpiece-dots .cp-dot{
+.centerpiece .img-dots{
+  position:absolute;bottom:12px;left:0;right:0;
+  display:flex;justify-content:center;gap:7px;
+}
+.img-dots .dot{
   width:6px;height:6px;border-radius:50%;
-  background:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;
+  background:rgba(255,255,255,0.45);cursor:pointer;transition:all 0.3s;
 }
-.centerpiece-dots .cp-dot.active{background:#fff;width:20px;border-radius:3px;}
+.img-dots .dot.active{background:#fff;width:22px;border-radius:3px;}
 
-/* Waveform overlay */
-.waveform-overlay{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 0.6s var(--ease);}
-.right-screen.bleed-crimson .waveform-overlay{opacity:0.38;}
-.waveform-overlay svg{width:100%;height:100%;}
+/* waveform overlay */
+.wave-overlay{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity 0.65s var(--ease);}
+.right-screen.crimson .wave-overlay{opacity:0.3;}
+.wave-overlay svg{width:100%;height:100%;}
 
-/* Giant fluid typography */
-.telemetry-panel{
-  width:100%;background:rgba(0,0,0,0.03);border-radius:24px;
-  padding:20px 16px;display:flex;flex-direction:column;align-items:center;
-  margin-bottom:14px;transition:all 0.6s var(--ease);
+/* telemetry digits */
+.telemetry{
+  width:100%;background:var(--card);
+  border-radius:22px;padding:22px 16px 18px;
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.03);
+  transition:all 0.65s var(--ease);
 }
-.right-screen.bleed-crimson .telemetry-panel{background:rgba(255,255,255,0.12);}
-.t-mode-title{font-size:12px;font-weight:600;letter-spacing:3px;color:var(--sage);transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .t-mode-title{color:rgba(255,255,255,0.8);}
-.t-digit-row{display:flex;align-items:baseline;justify-content:center;height:110px;margin:4px 0;}
-.t-digit-col{width:58px;height:110px;overflow:hidden;position:relative;}
-.t-digit-strip{position:absolute;left:0;width:100%;transition:transform 0.8s var(--ease);}
-.t-digit-item{height:110px;display:flex;align-items:center;justify-content:center;font-size:100px;font-weight:100;line-height:1;color:var(--text);transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .t-digit-item{color:#fff;}
-.t-degree{font-size:56px;font-weight:100;color:var(--text);transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .t-degree{color:rgba(255,255,255,0.7);}
-.t-subtitle{font-size:11px;color:var(--muted);letter-spacing:2px;transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .t-subtitle{color:rgba(255,255,255,0.6);}
+.right-screen.crimson .telemetry{
+  background:rgba(255,255,255,0.1);
+  box-shadow:none;
+}
+.telemetry .tm-label{
+  font-size:11px;font-weight:600;letter-spacing:3px;
+  color:var(--sage);transition:color 0.5s var(--ease);
+}
+.right-screen.crimson .telemetry .tm-label{color:rgba(255,255,255,0.75);}
+.telemetry .digits-row{
+  display:flex;align-items:baseline;justify-content:center;
+  height:120px;margin:2px 0;
+}
+.digit-col{width:60px;height:120px;overflow:hidden;position:relative;}
+.digit-strip{position:absolute;left:0;width:100%;transition:transform 0.8s var(--ease);}
+.digit-cell{
+  height:120px;display:flex;align-items:center;justify-content:center;
+  font-size:110px;font-weight:200;line-height:1;color:var(--text);
+  transition:color 0.5s var(--ease);
+}
+.right-screen.crimson .digit-cell{color:#fff;}
+.telemetry .deg-sym{
+  font-size:56px;font-weight:200;color:var(--text);
+  transition:color 0.5s var(--ease);
+}
+.right-screen.crimson .telemetry .deg-sym{color:rgba(255,255,255,0.6);}
+.telemetry .tm-sub{
+  font-size:11px;color:var(--muted);letter-spacing:2px;
+  transition:color 0.5s var(--ease);
+}
+.right-screen.crimson .telemetry .tm-sub{color:rgba(255,255,255,0.55);}
 
-/* Stats row */
-.stats-row{display:flex;gap:8px;width:100%;margin-bottom:14px;}
-.stat-card{
+/* quick stats */
+.quick-stats{display:flex;gap:10px;width:100%;margin-bottom:14px;}
+.stat-cell{
   flex:1;background:var(--card);border-radius:20px;
-  padding:14px;text-align:center;transition:all 0.6s var(--ease);
+  padding:15px 12px;text-align:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.03);
+  transition:all 0.65s var(--ease);
 }
-.right-screen.bleed-crimson .stat-card{background:rgba(255,255,255,0.12);}
-.stat-card .sc-val{font-size:22px;font-weight:600;color:var(--text);transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .stat-card .sc-val{color:#fff;}
-.stat-card .sc-label{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px;transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .stat-card .sc-label{color:rgba(255,255,255,0.6);}
-.mini-wave{width:100%;height:28px;margin-top:6px;}
-.mini-wave svg{width:100%;height:100%;}
+.right-screen.crimson .stat-cell{
+  background:rgba(255,255,255,0.1);
+  box-shadow:none;
+}
+.stat-cell .sv-num{font-size:24px;font-weight:600;color:var(--text);transition:color 0.5s var(--ease);}
+.right-screen.crimson .stat-cell .sv-num{color:#fff;}
+.stat-cell .sv-label{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px;transition:color 0.5s var(--ease);}
+.right-screen.crimson .stat-cell .sv-label{color:rgba(255,255,255,0.6);}
+.stat-cell .mini-wave{width:100%;height:26px;margin-top:6px;}
+.stat-cell .mini-wave svg{width:100%;height:100%;}
 
-/* Long press assist */
-.assist-section{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:8px;}
+/* long press assist */
+.assist-section{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:10px;}
 .assist-wrap{position:relative;}
 .assist-btn{
-  width:64px;height:64px;border-radius:50%;border:none;
-  background:linear-gradient(135deg,var(--sage),var(--sage-light));
+  width:68px;height:68px;border-radius:50%;border:none;
+  background:var(--card);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:22px;color:#fff;box-shadow:0 6px 20px rgba(125,142,126,0.3);
+  font-size:22px;color:var(--sage);
+  box-shadow:0 2px 10px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);
   transition:all 0.5s var(--ease);
   -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;
 }
-.right-screen.bleed-crimson .assist-btn{background:rgba(255,255,255,0.2);box-shadow:0 6px 20px rgba(209,77,59,0.2);}
+.right-screen.crimson .assist-btn{
+  background:rgba(255,255,255,0.15);color:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
 .assist-btn:active{transform:scale(0.93);}
-.assist-ring{position:absolute;inset:-10px;pointer-events:none;}
-.assist-ring circle.bg{fill:none;stroke:rgba(0,0,0,0.05);stroke-width:3;transition:stroke 0.5s var(--ease);}
-.right-screen.bleed-crimson .assist-ring circle.bg{stroke:rgba(255,255,255,0.15);}
-.assist-ring circle.fg{fill:none;stroke:var(--crimson);stroke-width:3;stroke-linecap:round;stroke-dasharray:270;stroke-dashoffset:270;transition:stroke-dashoffset 0.3s ease;}
-.assist-label{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:6px;transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .assist-label{color:rgba(255,255,255,0.6);}
+.assist-ring{position:absolute;inset:-9px;pointer-events:none;}
+.assist-ring circle.bg{
+  fill:none;stroke:rgba(0,0,0,0.04);stroke-width:3;
+  transition:stroke 0.5s var(--ease);
+}
+.right-screen.crimson .assist-ring circle.bg{stroke:rgba(255,255,255,0.12);}
+.assist-ring circle.fg{
+  fill:none;stroke:var(--crimson);stroke-width:3;stroke-linecap:round;
+  stroke-dasharray:270;stroke-dashoffset:270;
+  transition:stroke-dashoffset 0.3s ease;
+}
+.right-screen.crimson .assist-ring circle.fg{stroke:#fff;}
+.assist-label{
+  font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:8px;
+  transition:color 0.5s var(--ease);
+}
+.right-screen.crimson .assist-label{color:rgba(255,255,255,0.5);}
 
-/* Bottom player bar */
+/* bottom player bar */
 .player-bar{
   position:absolute;bottom:0;left:0;right:0;
-  display:flex;align-items:center;gap:12px;
-  padding:14px 18px 36px;
-  background:linear-gradient(to top,rgba(245,247,243,0.96) 70%,transparent);
+  display:flex;align-items:center;gap:12px;padding:12px 18px 34px;
+  background:linear-gradient(to top,rgba(255,255,255,0.97) 55%,rgba(255,255,255,0) 100%);
   transition:background 0.5s var(--ease);z-index:10;
 }
-.right-screen.bleed-crimson .player-bar{background:linear-gradient(to top,rgba(209,77,59,0.95) 70%,transparent);}
-.player-info{flex:1;transition:color 0.5s var(--ease);}
-.right-screen.bleed-crimson .player-info{color:#fff;}
-.player-info .pi-name{font-size:14px;font-weight:700;letter-spacing:1px;}
-.player-info .pi-status{font-size:10px;opacity:0.7;margin-top:2px;}
-.player-play{
-  width:40px;height:40px;border-radius:50%;background:var(--sage);border:none;
-  color:#fff;display:flex;align-items:center;justify-content:center;
-  font-size:14px;cursor:pointer;transition:all 0.5s var(--ease);
+.right-screen.crimson .player-bar{
+  background:linear-gradient(to top,rgba(192,57,43,0.97) 55%,rgba(192,57,43,0) 100%);
 }
-.right-screen.bleed-crimson .player-play{background:rgba(255,255,255,0.25);}
+.player-info{flex:1;transition:color 0.5s var(--ease);}
+.right-screen.crimson .player-info{color:#fff;}
+.player-info .pi-name{font-size:13px;font-weight:600;letter-spacing:0.5px;}
+.player-info .pi-status{font-size:10px;opacity:0.6;margin-top:2px;}
+.player-play-btn{
+  width:38px;height:38px;border-radius:50%;border:none;
+  background:var(--sage);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:all 0.5s var(--ease);
+  box-shadow:0 2px 8px rgba(125,142,126,0.25);
+}
+.right-screen.crimson .player-play-btn{
+  background:rgba(255,255,255,0.2);box-shadow:none;
+}
 
-/* ============ GLOBAL TOAST ============ */
+/* ========== TOAST ========== */
 .global-toast{
-  position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(120px);
-  background:var(--text);color:#fff;padding:14px 24px;border-radius:16px;
-  font-size:12px;font-weight:500;letter-spacing:1px;text-align:center;
+  position:fixed;bottom:64px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:rgba(23,23,23,0.92);color:#fff;padding:13px 26px;border-radius:16px;
+  font-size:12px;font-weight:500;letter-spacing:0.5px;text-align:center;
   opacity:0;z-index:9999;transition:all 0.5s var(--ease);
-  box-shadow:0 8px 32px rgba(0,0,0,0.25);pointer-events:none;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);pointer-events:none;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 }
 .global-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ============ RESPONSIVE ============ */
-@media(max-width:860px){.dual-phones{flex-direction:column;gap:16px;transform:scale(0.9);}}
-@media(max-width:430px){
-  .dual-phones{flex-direction:column;gap:20px;transform:none;}
-  .phone-bezel{width:100%;max-width:390px;height:auto;aspect-ratio:390/844;border-radius:0;box-shadow:none;}
-  .phone-bezel .dynamic-island,.phone-bezel .home-bar{display:none;}
+/* ========== RESPONSIVE ========== */
+@media(max-width:870px){
+  .dual-phones{flex-direction:column;gap:20px;transform:scale(0.88);}
 }
-@media(min-width:861px) and (max-height:950px){.dual-phones{transform:scale(0.8);}}
+@media(min-width:871px) and (max-height:960px){
+  .dual-phones{transform:scale(0.78);}
+}
 </style>
 </head>
 <body>
 
+<!-- decorative -->
+<div class="bg-decoration bg-blob-1"></div>
+<div class="bg-decoration bg-blob-2"></div>
+<div class="bg-decoration bg-blob-3"></div>
+
 <div class="dual-phones">
 
-<!-- ========== LEFT PHONE: ELDERLY CONTROL ========== -->
-<div class="phone-bezel" id="leftPhone">
+<!-- ========== LEFT PHONE ========== -->
+<div class="phone-bezel">
   <div class="dynamic-island"></div>
   <div class="phone-screen">
     <div class="left-topbar">
       <div class="avatar"><i class="fa-solid fa-user"></i></div>
       <span class="greeting">松颐 · 坐享其美</span>
-      <div class="icons"><i class="fa-solid fa-magnifying-glass"></i><i class="fa-solid fa-bell"></i></div>
+      <div class="icons">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <i class="fa-regular fa-bell"></i>
+      </div>
     </div>
+
     <div class="left-content">
-      <div class="card-list">
-        <div class="expand-card active" data-mode="read" onclick="activateCard(this,'read')">
-          <div class="card-header">
-            <div class="card-icon sage"><i class="fa-solid fa-book-open"></i></div>
-            <div class="card-info">
-              <div class="card-title">观云 · 专注阅读</div>
-              <div class="card-sub">腰椎支撑 · 98° 最佳阅读角</div>
-            </div>
-            <span class="card-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+      <div class="section-label">场景模式</div>
+
+      <div class="expand-card active" data-mode="read" onclick="activateCard(this,'read')">
+        <div class="card-header">
+          <div class="card-icon-wrap sage"><i class="fa-solid fa-book-open"></i></div>
+          <div class="card-info">
+            <div class="card-title">观云 · 专注阅读</div>
+            <div class="card-sub">人体工学腰椎支撑 · 气囊贴合</div>
           </div>
-          <div class="card-detail"><div class="card-detail-inner"><div class="detail-angle">98°</div><div class="detail-desc">人体工学腰椎支撑 · 气囊自适应贴合</div><div class="detail-features"><span class="detail-feature">气囊支撑</span><span class="detail-feature">腰托曲线</span></div></div></div>
+          <span class="card-angle-badge">98°</span>
         </div>
-        <div class="expand-card" data-mode="social" onclick="activateCard(this,'social')">
-          <div class="card-header">
-            <div class="card-icon sage"><i class="fa-solid fa-comments"></i></div>
-            <div class="card-info">
-              <div class="card-title">听泉 · 舒适社交</div>
-              <div class="card-sub">阻尼柔和 · 102° 标准会客角</div>
-            </div>
-            <span class="card-chevron"><i class="fa-solid fa-chevron-down"></i></span>
-          </div>
-          <div class="card-detail"><div class="card-detail-inner"><div class="detail-angle">102°</div><div class="detail-desc">柔和阻尼反馈 · 适合长时间会客交谈</div><div class="detail-features"><span class="detail-feature">阻尼柔和</span><span class="detail-feature">会客模式</span></div></div></div>
-        </div>
-        <div class="expand-card" data-mode="nap" onclick="activateCard(this,'nap')">
-          <div class="card-header">
-            <div class="card-icon sage"><i class="fa-solid fa-leaf"></i></div>
-            <div class="card-info">
-              <div class="card-title">松风 · 午后小憩</div>
-              <div class="card-sub">40°C 热敷 · 112° 零压躺姿</div>
-            </div>
-            <span class="card-chevron"><i class="fa-solid fa-chevron-down"></i></span>
-          </div>
-          <div class="card-detail"><div class="card-detail-inner"><div class="detail-angle">112°</div><div class="detail-desc">石墨烯远红外热敷 · 松风禅意舒缓</div><div class="detail-features"><span class="detail-feature">40°C 热敷</span><span class="detail-feature">零压模式</span><span class="detail-feature">气囊按摩</span></div></div></div>
-        </div>
-        <div class="expand-card" data-mode="assist" onclick="activateCard(this,'assist')">
-          <div class="card-header">
-            <div class="card-icon sage"><i class="fa-solid fa-hand-holding-heart"></i></div>
-            <div class="card-info">
-              <div class="card-title">微动力 · 安全助起</div>
-              <div class="card-sub">推杆托举 · 117° 斜向助力</div>
-            </div>
-            <span class="card-chevron"><i class="fa-solid fa-chevron-down"></i></span>
-          </div>
-          <div class="card-detail"><div class="card-detail-inner"><div class="detail-angle">117°</div><div class="detail-desc">推杆斜向托举 · 辅助长者安全起身</div><div class="detail-features"><span class="detail-feature">推杆托举</span><span class="detail-feature">15° 斜向</span></div></div></div>
-        </div>
-        <div class="expand-card" data-mode="warning" onclick="activateCard(this,'warning')">
-          <div class="card-header" style="padding-left:16px;">
-            <div class="card-icon" style="background:rgba(209,77,59,0.08);color:var(--crimson);"><i class="fa-solid fa-clock"></i></div>
-            <div class="card-info">
-              <div class="card-title" style="color:var(--crimson);">久坐静止预警</div>
-              <div class="card-sub">已持续 90 分钟 · 需关注</div>
+        <div class="card-detail-wrap">
+          <div class="card-detail-inner">
+            <div class="detail-large">98°</div>
+            <div class="detail-desc">最佳阅读角度，腰托自适应曲线支撑，3 组气囊动态调节</div>
+            <div class="detail-tags">
+              <span class="detail-tag">气囊支撑</span>
+              <span class="detail-tag">腰托曲线</span>
+              <span class="detail-tag">专注模式</span>
             </div>
           </div>
         </div>
       </div>
+
+      <div class="expand-card" data-mode="social" onclick="activateCard(this,'social')">
+        <div class="card-header">
+          <div class="card-icon-wrap sage"><i class="fa-solid fa-comments"></i></div>
+          <div class="card-info">
+            <div class="card-title">听泉 · 舒适会客</div>
+            <div class="card-sub">柔和阻尼反馈 · 标准社交角</div>
+          </div>
+          <span class="card-angle-badge">102°</span>
+        </div>
+        <div class="card-detail-wrap">
+          <div class="card-detail-inner">
+            <div class="detail-large">102°</div>
+            <div class="detail-desc">标准会客角度，阻尼柔和，久坐舒适不疲劳</div>
+            <div class="detail-tags">
+              <span class="detail-tag">柔和阻尼</span>
+              <span class="detail-tag">会客模式</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="expand-card" data-mode="nap" onclick="activateCard(this,'nap')">
+        <div class="card-header">
+          <div class="card-icon-wrap sage"><i class="fa-solid fa-leaf"></i></div>
+          <div class="card-info">
+            <div class="card-title">松风 · 午后小憩</div>
+            <div class="card-sub">石墨烯远红外热敷 · 零压</div>
+          </div>
+          <span class="card-angle-badge">112°</span>
+        </div>
+        <div class="card-detail-wrap">
+          <div class="card-detail-inner">
+            <div class="detail-large">112°</div>
+            <div class="detail-desc">零压躺姿，40°C 温和热敷，气囊交替按摩促循环</div>
+            <div class="detail-tags">
+              <span class="detail-tag">40°C 热敷</span>
+              <span class="detail-tag">零压模式</span>
+              <span class="detail-tag">气囊按摩</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="expand-card" data-mode="assist" onclick="activateCard(this,'assist')">
+        <div class="card-header">
+          <div class="card-icon-wrap sage"><i class="fa-solid fa-hand-holding-heart"></i></div>
+          <div class="card-info">
+            <div class="card-title">微动力 · 安全助起</div>
+            <div class="card-sub">推杆斜向托举 · 辅助起身</div>
+          </div>
+          <span class="card-angle-badge">117°</span>
+        </div>
+        <div class="card-detail-wrap">
+          <div class="card-detail-inner">
+            <div class="detail-large">117°</div>
+            <div class="detail-desc">推杆介入，底座向前上方 15° 斜向托举，安全起身</div>
+            <div class="detail-tags">
+              <span class="detail-tag">推杆托举</span>
+              <span class="detail-tag">15° 斜向</span>
+              <span class="detail-tag">安全保障</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="expand-card" data-mode="warning" onclick="activateCard(this,'warning')">
+        <div class="card-header">
+          <div class="card-icon-wrap" style="background:var(--crimson-wash);color:var(--crimson);">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+          <div class="card-info">
+            <div class="card-title" style="color:var(--crimson);">久坐静止预警</div>
+            <div class="card-sub">已持续 90 分钟 · 需关注</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="bottom-capsule-bar">
-      <div class="capsule-item active"><i class="fa-solid fa-house"></i><span>松颐</span></div>
-      <div class="capsule-item"><i class="fa-solid fa-sliders"></i><span>场景</span></div>
-      <div class="capsule-item"><i class="fa-solid fa-file-lines"></i><span>报告</span></div>
-      <div class="capsule-item"><i class="fa-solid fa-bolt"></i><span>动态</span></div>
+
+    <div class="bottom-bar">
+      <div class="capsule active"><i class="fa-solid fa-house"></i><span>松颐</span></div>
+      <div class="capsule"><i class="fa-solid fa-sliders"></i><span>场景</span></div>
+      <div class="capsule"><i class="fa-regular fa-file-lines"></i><span>报告</span></div>
+      <div class="capsule"><i class="fa-solid fa-bolt-lightning"></i><span>动态</span></div>
     </div>
   </div>
   <div class="home-bar"></div>
 </div>
 
-<!-- ========== RIGHT PHONE: FLUID PLAYER ========== -->
-<div class="phone-bezel" id="rightPhone">
+<!-- ========== RIGHT PHONE ========== -->
+<div class="phone-bezel">
   <div class="dynamic-island"></div>
   <div class="right-screen" id="rightScreen">
     <div class="right-topbar">
-      <button class="back-btn"><i class="fa-solid fa-chevron-left"></i></button>
-      <span class="mode-label" id="rightModeLabel">观云 · 实时监测中</span>
-      <button class="back-btn"><i class="fa-solid fa-ellipsis"></i></button>
+      <button class="r-btn"><i class="fa-solid fa-chevron-left"></i></button>
+      <span class="mode-label" id="rightModeLabel">观云 · 实时监测</span>
+      <button class="r-btn"><i class="fa-solid fa-ellipsis"></i></button>
     </div>
+
     <div class="right-body">
-      <div class="centerpiece-zone" id="centerpieceZone">
-        <img id="centerpieceImg" src="https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957242890-ahhuyx-Gemini_Generated_Image___1_.png" alt="松颐座椅">
-        <div class="centerpiece-dots" id="centerpieceDots">
-          <span class="cp-dot active" data-idx="0"></span><span class="cp-dot" data-idx="1"></span><span class="cp-dot" data-idx="2"></span><span class="cp-dot" data-idx="3"></span>
+      <!-- centerpiece -->
+      <div class="centerpiece">
+        <img id="centerpieceImg" src="https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957242890-ahhuyx-Gemini_Generated_Image___1_.png" alt="">
+        <div class="img-dots" id="imgDots">
+          <span class="dot active" data-idx="0"></span>
+          <span class="dot" data-idx="1"></span>
+          <span class="dot" data-idx="2"></span>
+          <span class="dot" data-idx="3"></span>
         </div>
-        <div class="waveform-overlay">
-          <svg viewBox="0 0 350 260" preserveAspectRatio="none"><path id="waveOverlayPath" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.7"/></svg>
-        </div>
-      </div>
-      <div class="telemetry-panel">
-        <div class="t-mode-title" id="tModeTitle">观云 · 最佳阅读角</div>
-        <div class="t-digit-row"><div class="t-digit-col" id="dH"></div><div class="t-digit-col" id="dT"></div><div class="t-digit-col" id="dU"></div><div class="t-degree" id="tDegree">°</div></div>
-        <div class="t-subtitle" id="tSubtitle">靠背角度 · 气囊支撑中</div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="sc-val" id="hrVal">72</div><div class="sc-label">心率 BPM</div>
-          <div class="mini-wave"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path id="miniWavePath" fill="none" stroke="#7D8E7E" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        </div>
-        <div class="stat-card">
-          <div class="sc-val" id="brVal">16</div><div class="sc-label">呼吸 /min</div>
-          <div class="mini-wave"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><path id="miniWavePath2" fill="none" stroke="#7D8E7E" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="wave-overlay">
+          <svg viewBox="0 0 350 260" preserveAspectRatio="none">
+            <path id="waveOverlayPath" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          </svg>
         </div>
       </div>
+
+      <!-- giant digits -->
+      <div class="telemetry">
+        <div class="tm-label" id="tmLabel">观云 · 最佳阅读角</div>
+        <div class="digits-row">
+          <div class="digit-col" id="dH"></div>
+          <div class="digit-col" id="dT"></div>
+          <div class="digit-col" id="dU"></div>
+          <div class="deg-sym" id="degSym">°</div>
+        </div>
+        <div class="tm-sub" id="tmSub">靠背角度 · 气囊支撑中</div>
+      </div>
+
+      <!-- quick stats -->
+      <div class="quick-stats">
+        <div class="stat-cell">
+          <div class="sv-num" id="hrVal">72</div>
+          <div class="sv-label">心率 BPM</div>
+          <div class="mini-wave">
+            <svg viewBox="0 0 96 26" preserveAspectRatio="none">
+              <path id="miniWave1" fill="none" stroke="#7D8E7E" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-cell">
+          <div class="sv-num" id="brVal">16</div>
+          <div class="sv-label">呼吸 · 次/分</div>
+          <div class="mini-wave">
+            <svg viewBox="0 0 96 26" preserveAspectRatio="none">
+              <path id="miniWave2" fill="none" stroke="#7D8E7E" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- long press assist -->
       <div class="assist-section">
         <div class="assist-wrap">
           <button class="assist-btn" id="assistBtn"
             onmousedown="startAssist(event)" onmouseup="cancelAssist()" onmouseleave="cancelAssist()"
             ontouchstart="startAssist(event)" ontouchend="cancelAssist()" ontouchcancel="cancelAssist()">
-            <i class="fa-solid fa-arrow-up"></i></button>
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
           <svg class="assist-ring" viewBox="0 0 92 92">
-            <circle class="bg" cx="46" cy="46" r="43"/><circle class="fg" id="assistFg" cx="46" cy="46" r="43"/>
+            <circle class="bg" cx="46" cy="46" r="43"/>
+            <circle class="fg" id="assistFg" cx="46" cy="46" r="43"/>
           </svg>
         </div>
         <div class="assist-label">长按 2 秒 · 微动力助起</div>
       </div>
     </div>
+
+    <!-- player bar -->
     <div class="player-bar">
       <div class="player-info">
         <div class="pi-name" id="playerName">观云阅读</div>
         <div class="pi-status" id="playerStatus">松颐 · 坐享其美</div>
       </div>
-      <button class="player-play" id="playerPlayBtn"><i class="fa-solid fa-play"></i></button>
+      <button class="player-play-btn"><i class="fa-solid fa-play"></i></button>
     </div>
   </div>
   <div class="home-bar"></div>
@@ -440,179 +661,155 @@ html,body{
 <div class="global-toast" id="globalToast"></div>
 
 <script>
-// ============ IMAGES ============
-const chairImages = [
+// ========== IMAGE GALLERY ==========
+const images = [
   'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957242890-ahhuyx-Gemini_Generated_Image___1_.png',
   'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957337848-dgaf1d-Gemini_Generated_Image___2_.png',
   'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957343651-jzfdj0-Gemini_Generated_Image___3_.png',
   'https://raw.githubusercontent.com/dannykeqiang-sys/image-hosting/main/images/1779957350166-wxu2ey-Gemini_Generated_Image___4_.png'
 ];
-let galleryIdx = 0;
-const cpImg = document.getElementById('centerpieceImg');
-const cpDots = document.querySelectorAll('#centerpieceDots .cp-dot');
-
-function switchGallery(idx){
-  if(idx===galleryIdx)return;
-  galleryIdx=idx;
-  cpImg.style.opacity='0.3';cpImg.style.transform='scale(1.05)';
+let imgIdx=0;
+const cpImg=document.getElementById('centerpieceImg');
+const dots=document.querySelectorAll('#imgDots .dot');
+function switchImg(i){
+  if(i===imgIdx)return;imgIdx=i;
+  cpImg.style.opacity='0.25';cpImg.style.transform='scale(1.04)';
   setTimeout(()=>{
-    cpImg.src=chairImages[idx];
-    cpImg.style.opacity='1';cpImg.style.transform='scale(1)';
-    cpDots.forEach((d,i)=>d.classList.toggle('active',i===idx));
-  },350);
+    cpImg.src=images[i];cpImg.style.opacity='1';cpImg.style.transform='scale(1)';
+    dots.forEach((d,j)=>d.classList.toggle('active',j===i));
+  },320);
 }
-cpDots.forEach(d=>d.addEventListener('click',()=>switchGallery(parseInt(d.dataset.idx))));
-setInterval(()=>switchGallery((galleryIdx+1)%4),5000);
+dots.forEach(d=>d.addEventListener('click',()=>switchImg(parseInt(d.dataset.idx))));
+setInterval(()=>switchImg((imgIdx+1)%4),5000);
 
-// ============ MODE STATE MACHINE ============
-const MODES = {
-  read:{title:'观云阅读',subtitle:'靠背角度 · 气囊支撑中',angle:'98',isCrimson:false,player:'观云阅读',playerStatus:'松颐 · 坐享其美'},
-  social:{title:'听泉会客',subtitle:'靠背角度 · 标准社交角',angle:'102',isCrimson:false,player:'听泉会客',playerStatus:'松颐 · 坐享其美'},
-  nap:{title:'松风小憩',subtitle:'靠背角度 · 40°C 温和热敷',angle:'112',isCrimson:true,player:'松风小憩',playerStatus:'40°C 热敷 · 气囊按摩中'},
-  assist:{title:'安全助起',subtitle:'靠背角度 · 推杆托举中',angle:'117',isCrimson:true,player:'安全助起',playerStatus:'推杆介入 · 斜向托举 15°'},
-  warning:{title:'久坐预警',subtitle:'久坐静止 · 需要关注',angle:'112',isCrimson:true,player:'久坐预警',playerStatus:'智能干预 · 气囊按摩已启动'}
+// ========== MODES ==========
+const MODES={
+  read:{title:'观云阅读',sub:'靠背角度 · 气囊支撑中',angle:'98',crimson:false,pName:'观云阅读',pStatus:'松颐 · 坐享其美'},
+  social:{title:'听泉会客',sub:'靠背角度 · 标准社交角',angle:'102',crimson:false,pName:'听泉会客',pStatus:'松颐 · 坐享其美'},
+  nap:{title:'松风小憩',sub:'靠背角度 · 40°C 温和热敷',angle:'112',crimson:true,pName:'松风小憩',pStatus:'40°C 热敷 · 按摩中'},
+  assist:{title:'安全助起',sub:'靠背角度 · 推杆托举中',angle:'117',crimson:true,pName:'安全助起',pStatus:'推杆介入 · 斜向 15°'},
+  warning:{title:'久坐预警',sub:'久坐静止 · 需要关注',angle:'112',crimson:true,pName:'久坐预警',pStatus:'智能干预 · 气囊按摩'}
 };
-let currentMode='read',displayAngle=98,targetAngle=98;
+let curMode='read',dispAngle=98,tgtAngle=98;
 
-// ============ LEFT PHONE CARD ACTIVATION ============
-function activateCard(cardEl,mode){
-  if(currentMode===mode)return;
+function activateCard(el,mode){
+  if(curMode===mode)return;
   document.querySelectorAll('.expand-card').forEach(c=>c.classList.remove('active'));
-  cardEl.classList.add('active');
-  currentMode=mode;
-  const m=MODES[mode];
-  syncRightPhone(m);
-  showToast('已切换至 「'+m.title+'」 · 靠背角度 '+m.angle+'°');
+  el.classList.add('active');curMode=mode;
+  syncRight(MODES[mode]);
+  showToast('已切换至「'+MODES[mode].title+'」· 靠背角度 '+MODES[mode].angle+'°');
 }
 
-// ============ RIGHT PHONE COLOR BLEED SYNC ============
-function syncRightPhone(m){
+function syncRight(m){
   const rs=document.getElementById('rightScreen');
-  m.isCrimson?rs.classList.add('bleed-crimson'):rs.classList.remove('bleed-crimson');
-  document.getElementById('rightModeLabel').textContent=m.title+' · 实时监测中';
-  document.getElementById('tModeTitle').textContent=m.title;
-  document.getElementById('tSubtitle').textContent=m.subtitle;
-  document.getElementById('playerName').textContent=m.player;
-  document.getElementById('playerStatus').textContent=m.playerStatus;
-  targetAngle=parseInt(m.angle);
-  animateDigits(targetAngle);
+  m.crimson?rs.classList.add('crimson'):rs.classList.remove('crimson');
+  document.getElementById('rightModeLabel').textContent=m.title+' · 实时监测';
+  document.getElementById('tmLabel').textContent=m.title;
+  document.getElementById('tmSub').textContent=m.sub;
+  document.getElementById('playerName').textContent=m.pName;
+  document.getElementById('playerStatus').textContent=m.pStatus;
+  tgtAngle=parseInt(m.angle);animateDigits(tgtAngle);
 }
 
-// ============ ROLLING DIGIT COUNTER ============
-function buildDigitColumns(){
+// ========== ROLLING DIGITS ==========
+!function buildCols(){
   ['dH','dT','dU'].forEach(id=>{
-    const col=document.getElementById(id);
-    const strip=document.createElement('div');
-    strip.className='t-digit-strip';
-    for(let s=0;s<2;s++)for(let i=0;i<=9;i++){
-      const it=document.createElement('div');it.className='t-digit-item';it.textContent=i;strip.appendChild(it);
+    const c=document.getElementById(id),s=document.createElement('div');
+    s.className='digit-strip';
+    for(let r=0;r<2;r++)for(let i=0;i<=9;i++){
+      const e=document.createElement('div');e.className='digit-cell';e.textContent=i;s.appendChild(e);
     }
-    col.appendChild(strip);
+    c.appendChild(s);
   });
-}
-function setDigits(val){
-  const s=val.toString().padStart(3,'0');
+}();
+function setDigits(v){
+  const str=v.toString().padStart(3,'0');
   ['dH','dT','dU'].forEach((id,i)=>{
-    const strip=document.getElementById(id).querySelector('.t-digit-strip');
-    const h=document.getElementById(id).clientHeight;
-    strip.style.transform='translateY('+(-parseInt(s[i])*h)+'px)';
+    const s=document.getElementById(id).querySelector('.digit-strip');
+    s.style.transform='translateY('+(-parseInt(str[i])*document.getElementById(id).clientHeight)+'px)';
   });
 }
-function animateDigits(target){
-  const start=displayAngle,diff=target-start,dur=800,st=performance.now();
-  function tick(now){
-    const p=Math.min((now-st)/dur,1),eased=1-Math.pow(1-p,3);
-    setDigits(Math.round(start+diff*eased));
-    if(p<1)requestAnimationFrame(tick);else{displayAngle=target;setDigits(target);}
-  }
-  requestAnimationFrame(tick);
-  displayAngle=target;
+function animateDigits(t){
+  const start=dispAngle,d=t-start,dur=800,st=performance.now();
+  (function tick(now){
+    const p=Math.min((now-st)/dur,1),e=1-Math.pow(1-p,3);
+    setDigits(Math.round(start+d*e));
+    p<1?requestAnimationFrame(tick):(dispAngle=t,setDigits(t));
+  })(st);
+  dispAngle=t;
 }
+setDigits(98);
 
-// ============ LONG PRESS ASSIST ============
-let assistInterval=null,assistStart=0;
-const ASSIST_DUR=2000;
+// ========== LONG PRESS ==========
+let apInt=null,apStart=0;
+const DUR=2000;
 function startAssist(e){
-  e.preventDefault();
-  if(assistInterval)return;
-  const fg=document.getElementById('assistFg');
-  fg.style.strokeDashoffset='270';fg.style.transition='none';
-  assistStart=Date.now();
-  assistInterval=setInterval(()=>{
-    const frac=Math.min((Date.now()-assistStart)/ASSIST_DUR,1);
-    fg.style.strokeDashoffset=270*(1-frac);
-    if(frac>=1)completeAssist();
+  e.preventDefault();if(apInt)return;
+  const f=document.getElementById('assistFg');
+  f.style.strokeDashoffset='270';f.style.transition='none';
+  apStart=Date.now();
+  apInt=setInterval(()=>{
+    const p=Math.min((Date.now()-apStart)/DUR,1);
+    f.style.strokeDashoffset=270*(1-p);
+    if(p>=1)completeAssist();
   },30);
 }
 function cancelAssist(){
-  if(!assistInterval)return;
-  clearInterval(assistInterval);assistInterval=null;
-  const fg=document.getElementById('assistFg');
-  fg.style.transition='stroke-dashoffset 0.3s ease';fg.style.strokeDashoffset='270';
+  if(!apInt)return;clearInterval(apInt);apInt=null;
+  const f=document.getElementById('assistFg');
+  f.style.transition='stroke-dashoffset 0.3s ease';f.style.strokeDashoffset='270';
 }
 function completeAssist(){
-  clearInterval(assistInterval);assistInterval=null;
+  clearInterval(apInt);apInt=null;
   document.getElementById('assistFg').style.strokeDashoffset='270';
-  currentMode='assist';
+  curMode='assist';
   document.querySelectorAll('.expand-card').forEach(c=>c.classList.remove('active'));
-  const assistCard=document.querySelector('.expand-card[data-mode="assist"]');
-  if(assistCard)assistCard.classList.add('active');
-  syncRightPhone(MODES.assist);
-  showToast('⚡ 微动力推杆介入 · 底座斜向托举 15° · 角度已设定至 117°');
+  const ac=document.querySelector('.expand-card[data-mode="assist"]');
+  if(ac)ac.classList.add('active');
+  syncRight(MODES.assist);
+  showToast('微动力推杆介入 · 底座斜向托举 15° · 角度已设定至 117°');
 }
 
-// ============ WAVEFORMS ============
-let wavePhase=0;
-function initWaveforms(){
-  function drawOverlayWave(){
-    const path=document.getElementById('waveOverlayPath');
-    if(!path)return;
-    const pts=180;let d='';
-    for(let i=0;i<=pts;i++){
-      const x=(i/pts)*350,base=130;
-      d+=(i===0?'M ':'L ')+x+' '+(base+Math.sin(wavePhase+i*0.15)*8+Math.sin(wavePhase*0.3+i*0.04)*12+Math.sin(wavePhase*1.8+i*0.3)*3);
+// ========== WAVEFORMS ==========
+let ph=0;
+(function tick(){
+  const op=document.getElementById('waveOverlayPath');
+  if(op){
+    let d='';const n=180;
+    for(let i=0;i<=n;i++){
+      d+=(i?'L ':'M ')+(i/n*350)+' '+(130+Math.sin(ph+i*.15)*8+Math.sin(ph*.3+i*.04)*12+Math.sin(ph*1.8+i*.3)*3);
     }
-    path.setAttribute('d',d);
+    op.setAttribute('d',d);
   }
-  function drawMiniWaves(){
-    ['miniWavePath','miniWavePath2'].forEach((id,idx)=>{
-      const path=document.getElementById(id);
-      if(!path)return;
-      const pts=60;let d='';
-      for(let i=0;i<=pts;i++){
-        const x=(i/pts)*100,base=14,off=idx===0?0:Math.PI/3;
-        d+=(i===0?'M ':'L ')+x+' '+(base+Math.sin(wavePhase*(0.8+idx*0.2)+i*0.25+off)*5+Math.sin(wavePhase*0.4+i*0.08+off)*3);
-      }
-      path.setAttribute('d',d);
-    });
-    const hrEl=document.getElementById('hrVal'),brEl=document.getElementById('brVal');
-    if(hrEl)hrEl.textContent=70+Math.round(Math.sin(wavePhase*0.7)*8);
-    if(brEl)brEl.textContent=15+Math.round(Math.cos(wavePhase*0.5)*4);
-  }
-  function tick(){wavePhase+=0.05;drawOverlayWave();drawMiniWaves();requestAnimationFrame(tick);}
-  requestAnimationFrame(tick);
-}
+  ['miniWave1','miniWave2'].forEach((id,idx)=>{
+    const p=document.getElementById(id);if(!p)return;
+    const off=idx?Math.PI/3:0;let d='';const n=50;
+    for(let i=0;i<=n;i++){
+      d+=(i?'L ':'M ')+(i/n*96)+' '+(13+Math.sin(ph*(.8+idx*.2)+i*.25+off)*5+Math.sin(ph*.4+i*.08+off)*3);
+    }
+    p.setAttribute('d',d);
+  });
+  const h=document.getElementById('hrVal'),b=document.getElementById('brVal');
+  if(h)h.textContent=70+Math.round(Math.sin(ph*.7)*8);
+  if(b)b.textContent=15+Math.round(Math.cos(ph*.5)*4);
+  ph+=.05;requestAnimationFrame(tick);
+})();
 
-// ============ TOAST ============
-let toastTimer;
-function showToast(msg){
+// ========== TOAST ==========
+let tt;
+function showToast(m){
   const t=document.getElementById('globalToast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+  t.textContent=m;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ============ CAPSULE BAR ============
-document.querySelectorAll('.capsule-item').forEach(item=>{
-  item.addEventListener('click',function(){
-    document.querySelectorAll('.capsule-item').forEach(i=>i.classList.remove('active'));
+// ========== BOTTOM CAPSULES ==========
+document.querySelectorAll('.capsule').forEach(c=>{
+  c.addEventListener('click',function(){
+    document.querySelectorAll('.capsule').forEach(x=>x.classList.remove('active'));
     this.classList.add('active');
-    showToast('「'+this.textContent.trim()+'」模块开发中 · 敬请期待');
   });
 });
-
-// ============ INIT ============
-buildDigitColumns();setDigits(98);initWaveforms();
 </script>
 </body>
 </html>
